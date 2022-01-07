@@ -1,8 +1,9 @@
-package main
+package webhook
 
 import (
 	"encoding/json"
-	"fmt"
+	"engine/engine"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,9 +12,14 @@ import (
 	v1 "k8s.io/apiserver/pkg/apis/audit/v1"
 )
 
-func main() {
+func HookStart() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+
+			}
+		}(r.Body)
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "failed to read body", http.StatusBadRequest)
@@ -28,48 +34,12 @@ func main() {
 		}
 		// Iterate and filter audit events
 		for _, event := range events.Items {
-			// if isPodCreation(event) {
-			// 	fmt.Printf("Pod creation event detected: \n%+v\n", event)
-			// }
-
-			// if isPodDelete(event) {
-			// 	fmt.Printf("Pod delete event detected: \n%+v\n", event)
-			// }
-
-			// if isConfigMap(event) {
-			// 	fmt.Printf("ConfigMap event detected: \n%+v\n", event)
-			// }
-			// if isSecretList(event) {
-			// 	fmt.Printf("list secret event detected: \n%+v\n", event)
-			// }
-
-			// if isCronjobChange(event) {
-			// 	fmt.Printf("cronjob change event detected: \n%+v\n", event)
-			// }
-
-			// if test(event) {
-			// 	fmt.Printf("event detected: \n%+v\n", event)
-			// 	fmt.Printf("verb: %s\n\n", event.Verb)
-			// }
-			// event.Verb == "delete"
-
 			// capture curl event
-			if strings.Contains(event.UserAgent, "curl") {
-				fmt.Printf("Event detected: %+v\n\n", event)
-				fmt.Print("Src", event.SourceIPs)
-				fmt.Printf("\n\n")
-			}
-
-			if event.ResponseStatus.Code != 200 {
-				fmt.Printf("Event detected: %+v\n\n", event)
-				fmt.Print("Src", event.SourceIPs)
-				fmt.Printf("\n\n")
-			}
-
+			engine.Fire(&event)
 		}
 	})
 
-	fmt.Printf("Starting server at port 8080\n")
+	log.Println("Kubernetes: WebServer Hook started at port 8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}

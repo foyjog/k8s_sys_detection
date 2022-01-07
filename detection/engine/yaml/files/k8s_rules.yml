@@ -1,0 +1,51 @@
+---
+rules:
+  - name: 集群管理组件实例变更
+    description: 集群管理组件实例变更
+    condition: event.ObjectRef.Resource == "pods" and event.ObjectRef.Namespace == "kube-system"  and (event.Verb == "create" or event.Verb == "delete")
+    priority: 2
+
+  - name: 集群配置被篡改(ConfigMap变更导致)
+    description: 集群配置被篡改(ConfigMap变更导致)
+    condition: event.ObjectRef.Resource == "configmaps" and event.ObjectRef.Name == "test" and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "patch" or event.Verb == "update")
+    priority: 2
+
+  - name: 集群凭证批量查询(Secret List)
+    description: 集群凭证批量查询(Secret List)
+    condition: event.ObjectRef.Resource == "secrets" and event.Verb == "list"
+    priority: 2
+
+  - name: 集群定时任务变更(Cronjob变更)
+    description: 集群定时任务变更(Cronjob变更)
+    condition: event.ObjectRef.Resource == "cronjobs" and event.Verb == "patch"
+    priority: 2
+
+  - name: 集群高权限凭证变更(Service Account CRUD事件)
+    description: 集群高权限凭证变更(Service Account CRUD事件)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "serviceaccounts"  and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update" or event.Verb == "list"  or event.Verb == "get")
+    priority: 2
+
+  - name: 集群高权限凭证变更(Role CRUD事件)
+    description: 集群高权限凭证变更(Role CRUD事件)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "roles" and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update" or event.Verb == "patch" or event.Verb == "list"  or event.Verb == "get")
+    priority: 2
+
+  - name: 集群高权限凭证变更(ClusterRole CRUD事件)
+    description: 集群高权限凭证变更(ClusterRole CRUD事件)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "clusterroles"  and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update" or event.Verb == "patch" or event.Verb == "list"  or event.Verb == "get")
+    priority: 2
+
+  - name: 集群高权限凭证变更(RoleBinding CRUD事件)
+    description: 集群高权限凭证变更(RoleBinding CRUD事件)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "rolebindings" and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update" or event.Verb == "patch" or event.Verb == "list"  or event.Verb == "get")
+    priority: 2
+
+  - name: 集群高权限凭证变更(ClusterRoleBinding CRUD事件)
+    description: 集群高权限凭证变更(ClusterRoleBinding CRUD事件)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "clusterrolebindings"   and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update" or event.Verb == "patch" or event.Verb == "list"  or event.Verb == "get")
+    priority: 2
+
+  - name: 集群准入控制器变更(PodSecurityPolicy准入控制器)
+    description: 集群准入控制器变更(PodSecurityPolicy准入控制器)
+    condition: event.UserAgent0 == "kubectl" and event.ObjectRef.Resource == "podsecuritypolicies"   and (event.Verb == "create" or event.Verb == "delete" or event.Verb == "update"  or event.Verb == "patch")
+    priority: 2

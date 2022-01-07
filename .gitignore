@@ -1,8 +1,0 @@
-token
-falco/*
-pod/*
-debug/*
-falco-security-workshop
-.vscode/*
-*.crt
-*.key
